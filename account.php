@@ -1,12 +1,15 @@
 <?php
 session_start();
+ini_set('session.cookie_httponly', true);
 require_once 'config.php';
+
 
 if (!isset($_COOKIE['session_id'])) {
     header('Location: ./');
     exit;
 }
 
+mysqli_set_charset($conn, "utf8");
 
 $sql = "SELECT * FROM users WHERE cookie='" . $_COOKIE['session_id'] . "'";
 $result = $conn->query($sql);
@@ -245,7 +248,7 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
           echo '<a href="./badgets" class="list-group-item">Modificar Insignias</a>';
         } 
         if ($level == '1') {
-          echo '<a href="./gbagdets" class="list-group-item">Otorgar Insignias</a>';
+          echo '<a href="./gbadgets" class="list-group-item">Otorgar Insignias</a>';
         } 
          if ($level == '1') {
           echo '<a href="./list" class="list-group-item">Usuarios</a>';
@@ -305,7 +308,7 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
               <label for="floatingusername">Usuario</label>
             </div>
             <div class="form-floating mb-3">
-              <select class="form-select " name="doctype" id="inlineFormSelectPref" required>
+              <select class="form-select " name="doctype" id="inlineFormSelectPrefId" required>
                 <option selected>Seleccione...</option>
                 <option value="1" <?php if ($doctype == '1') {
                   echo 'selected';
@@ -378,12 +381,12 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
               echo '<div class="alert alert-danger" role="alert">' . $msg . '</div>';
             } ?>
             <div class="form-floating mb-3">
-              <input type="password" name="password" class="form-control rounded-3" id="floatingLastname"
+              <input type="password" name="password" class="form-control rounded-3" id="floatingnpassword"
                 value="" placeholder="********" required>
               <label for="floatingLastname">Contraseña</label>
             </div>
             <div class="form-floating mb-3">
-              <input type="password" name="rpassword" class="form-control rounded-3" id="floatingusername"
+              <input type="password" name="rpassword" class="form-control rounded-3" id="floatingrpassword"
                 value="" placeholder="********" required>
               <label for="floatingusername">Confirmación de Contraseña</label>
             </div>
@@ -398,8 +401,6 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
 
 
   <?php
-  mysqli_set_charset($conn, "utf8");
-  header('Content-Type: text/html; charset=utf-8');
   $sqlgrid = "SELECT * FROM badget";
   $resultgrid = mysqli_query($conn, $sqlgrid); ?>
   <div class="modal fade" id="badgetmodal" tabindex="-1" aria-labelledby="badgetmodalLabel" aria-hidden="true">
@@ -412,7 +413,7 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
               <?php
 
               while ($rowgrid = mysqli_fetch_assoc($resultgrid)) {
-                $current_user_id = $_SESSION['id'];
+                $current_user_id = $row['id'];
                 $badge_id = $rowgrid['id'];
 
                 $sqlcolor = "SELECT COUNT(*) AS total FROM badgetwon WHERE iduser = '$current_user_id' AND idbadget = '$badge_id'";
@@ -471,7 +472,7 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
                   $fontcolorbadget = 'style="color:gray !important;"';
                 }
 
-                echo '<a href="#" class="col-md-4 col-4 text-center mb-4 text-decoration-none color10" Data-bs-toggle="popover" title="' . $rowgrid['url'] . '" data-bs-content="' . $rowgrid['description'] . ' ' . $dateshow . ' "><img src="./assets/images/badgets/' . $rowgrid['url'] . '" class="badgetimg" ' . $colorbadget . '  alt="Insignia ' . $rowgrid['name'] . '"/><div class="text-decoration-none text-center" ' . $fontcolorbadget . '>' . $rowgrid['name'] . '</div></a>';
+                echo '<a href="#" class="col-md-4 col-4 text-center mb-4 text-decoration-none color10" Data-bs-toggle="popover" title="' . $rowgrid['name'] . '" data-bs-content="' . $rowgrid['description'] . ' ' . $dateshow . ' "><img src="./assets/images/badgets/' . $rowgrid['url'] . '" class="badgetimg" ' . $colorbadget . '  alt="Insignia ' . $rowgrid['name'] . '"/><div class="text-decoration-none text-center" ' . $fontcolorbadget . '>' . $rowgrid['name'] . '</div></a>';
 
               }
               ?>
@@ -515,7 +516,7 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
     </ul>
     <p class="text-center text-body-secondary">© 2023 Jóvenes Soñadores Por Talaigua</p>
   </footer>
-  <nav class="nav nav-fill fixed-bottom backgroundalt">
+  <nav class="nav nav-fill fixed-bottom backgroundalt pb-3">
     <a class="nav-link" href="./dashboard"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
         fill="currentColor" class="bi bi-house-heart" viewBox="0 0 16 16">
         <path d="M8 6.982C9.664 5.309 13.825 8.236 8 12 2.175 8.236 6.336 5.309 8 6.982Z" />
@@ -549,23 +550,9 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
     </a>
   </nav>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-<script src="./assets/js/app.js"></script>
 <script>
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function (registration) {
-          console.log('Service worker registered successfully with scope: ', registration.scope);
-        })
-        .catch(function (error) {
-          console.log('Service worker registration failed with error: ', error);
-        });
-    });
-  }
 </script>
 <script>
   window.addEventListener("load", function () {
@@ -615,6 +602,7 @@ if (urlParams.get('success') === 'ypass') {
   toastpass.show();
 }
 </script>
+<script src="./assets/js/app.js"></script>
 </body>
 
 </html>

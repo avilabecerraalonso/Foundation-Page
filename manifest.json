@@ -8,7 +8,7 @@
   "orientation": "portrait",
   "scope": "/",
   "short_name": "Jóvenes Soñadores",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "theme_color": "#ffffff",
   "categories": [
     "business",

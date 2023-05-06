@@ -24,39 +24,28 @@ if ($resultss && mysqli_num_rows($resultss) > 0) {
 } else {
     echo "Error fetching user information: " . mysqli_error($conn);
 }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['iddelete'])) {
 
-    $iddelete = $_POST['iddelete'];
-
-    $sqldelete = "DELETE FROM users WHERE id = $iddelete";
-
-    // Execute the SQL query
-    if (mysqli_query($conn, $sqldelete)) {
-            header('Location: list?delete=y');
-    } else {
-            header('Location: list?delete=n');
-
-    }
-
-    // Close the database connection
-    mysqli_close($conn);
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idupdate']) && isset($_POST['level'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['iduser']) && isset($_POST['idbadget'])) {
     
-    $idupdate = $_POST['idupdate'];
-    $level = $_POST['level'];
+    $iduser = $_POST['iduser'];
+    $idbadget = $_POST['idbadget'];
 
-    $sql = "UPDATE users SET level = $level WHERE id = $idupdate";
+    $result = mysqli_query($conn, "SELECT * FROM badgetwon WHERE iduser = $iduser AND idbadget = $idbadget");
 
-    if (mysqli_query($conn, $sql)) {
-      header("Location: list?update=y");
+    if (mysqli_num_rows($result) > 0) {
+        mysqli_query($conn, "DELETE FROM badgetwon WHERE iduser = $iduser AND idbadget = $idbadget");
+    header('Location: ./gbadgets?deleted=y');
+    exit;
     } else {
-      header("Location: list?update=n");
+        mysqli_query($conn, "INSERT INTO badgetwon (iduser, idbadget) VALUES ($iduser, $idbadget)");
+    header('Location: ./gbadgets?activated=y');
+    exit;
     }
 
     mysqli_close($conn);
 }
+
+
 
 $querymodal = "SELECT * FROM users";
 $resultmodal = mysqli_query($conn, $querymodal);
@@ -74,7 +63,7 @@ $resultmodal = mysqli_query($conn, $querymodal);
     <meta name="revisit-after" content="30 days">
     <link rel="canonical" href="https://youngdreamersfortalaigua.org/list">
     <link rel="manifest" href="./manifest.json">
-    <title>Lista de Uusuarios | Fundación Jóvenes Soñadores Por Talaigua</title>
+    <title>Otorgar Insignias | Fundación Jóvenes Soñadores Por Talaigua</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -83,7 +72,7 @@ $resultmodal = mysqli_query($conn, $querymodal);
 			function loadData(page){
 				var keyword = $('#keyword').val();
 				$.ajax({
-					url: 'fetch.php',
+					url: 'fetchwbadget.php',
 					type: 'POST',
 					data: {page: page, keyword: keyword},
 					success: function(response){
@@ -119,98 +108,69 @@ $resultmodal = mysqli_query($conn, $querymodal);
             <div class="result" id="result" style="margin-top:8px">
 
             </div>
-            <?php while ($rowmodal = mysqli_fetch_assoc($resultmodal)): 
-              $adminlevel ='';
-              $editorlevel ='';
-              $userlevel ='';
-              if($rowmodal['level']=='1'){
-                $adminlevel = 'selected';
-              }elseif($rowmodal['level']=='2'){
-                $editorlevel = 'selected';
-              }else{
-                $userlevel = 'selected';
-              }
-
-$lastLoginTime = strtotime($rowmodal["last_login"]);
-if(empty($rowmodal['last_login'])){
-  $time_ago = "Nunca";
-}else{
-$time_diff = time() - $lastLoginTime;
-
-if ($time_diff < 60) { 
-    $time_ago = "1 minuto";
-} elseif ($time_diff < 3600) { 
-    $minutes = floor($time_diff / 60);
-    $time_ago = ($minutes == 1) ? "1 minuto" : "$minutes minutos";
-} elseif ($time_diff < 86400) {
-    $hours = floor($time_diff / 3600);
-    $time_ago = ($hours == 1) ? "1 hora" : "$hours horas";
-} elseif ($time_diff < 604800) {
-    $days = floor($time_diff / 86400);
-    $time_ago = ($days == 1) ? "1 dia" : "$days dias";
-} elseif ($time_diff < 2592000) { 
-    $weeks = floor($time_diff / 604800);
-    $time_ago = ($weeks == 1) ? "1 semana" : "$weeks semanas";
-} else { 
-    $months = floor($time_diff / 2592000);
-    $time_ago = ($months == 1) ? "1 mes" : "$months meses";
-} }
-              ?>
+            <?php while ($rowmodal = mysqli_fetch_assoc($resultmodal)): ?>
               <div class="modal fade" id="ModalEdit<? echo $rowmodal['id']; ?>" tabindex="-1" aria-labelledby="ModalEdit<? echo $rowmodal['id']; ?>Label" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content rounded-4 shadow">
         <div class="modal-header p-5 pb-4 border-bottom-0">
-          <h1 class="fw-bold mb-0 fs-2">Editar cuenta</h1>
+          <h1 class="fw-bold mb-0 fs-2">Badgets de <?php $name = $rowmodal['name'];
+$lastname = $rowmodal['lastname'];
+
+$first_name = substr($name, 0, strpos($name, " "));
+
+// Get first last name
+$first_lastname = substr($lastname, 0, strpos($lastname, " "));
+
+echo $first_name . " " . $first_lastname;?></h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body p-5 pt-0">
-        <?php if($rowmodal['id']=='1'){
-            echo '<h4>Usuario no se puede modificar</h4>';
-            echo '<small class="text-body-secondary">Ultima vez conectado hace '. $time_ago.'.</small>';
-          }else{?>
-          <form class="" method="post" action="">
-            <h2><? echo $rowmodal['name'].' '.$rowmodal['lastname']; ?></h2>
-            <div class="form-floating mb-3">
-            <input type="text" class="visually-hidden" name="idupdate" value="<? echo $rowmodal['id']; ?>"/>
-            <select class="form-select " name="level" id="inlineFormSelectPref" required>
-              <option selected>Seleccione...</option>
-              <option value="1" <? echo $adminlevel;?>>Administrador</option>
-              <option value="2" <? echo $editorlevel;?>>Editor</option>
-              <option value="0" <? echo $userlevel;?>>Usuario</option>
-			</select>
-            <small class="text-body-secondary"><?php if($time_ago=='Nunca'){echo'Nunca se ha conectado';}else{echo "Ultima vez conectado hace " . $time_ago; }?></small>
-              
-            <label for="floatingDoctype">Tipo de usuario</label>
-            </div>
-            <button class="w-100 mb-2 btn btn-lg rounded-3 background30 fwhite end-0" name="edit" type="submit">Editar</button>
-            
-          </form>
-          <?php } ?>
+        <div class="modal-body p-5 pt-0 row">
+          <?php 
+  mysqli_set_charset($conn, "utf8");
+  header('Content-Type: text/html; charset=utf-8');
+  $sqlgrid = "SELECT * FROM badget";
+  $resultgrid = mysqli_query($conn, $sqlgrid);
+
+              while ($rowgrid = mysqli_fetch_assoc($resultgrid)) {
+                $current_user_id = $rowmodal['id'];
+                $badge_id = $rowgrid['id'];
+
+                $sqlcolor = "SELECT COUNT(*) AS total FROM badgetwon WHERE iduser = '$current_user_id' AND idbadget = '$badge_id'";
+
+                $resultcolor = mysqli_query($conn, $sqlcolor);
+
+                if ($resultcolor) {
+                  $rowcolor = mysqli_fetch_assoc($resultcolor);
+                  $total_rows = $rowcolor['total'];
+                } else {
+                  $total_rows = 0;
+                }
+                
+                date_timestamp_get($date);
+
+                if ($total_rows > 0) {
+                  $colorbadget = '';
+                  $fontcolorbadget = '';
+                  $idfordate = $rowgrid['id'];
+                  $sqldate = "SELECT * FROM badgetwon WHERE iduser = '$current_user_id' AND idbadget = '$idfordate'";
+                  
+                } else {
+                  $dateshow = '';
+                  $colorbadget = 'style="filter: grayscale(1);"';
+                  $fontcolorbadget = 'style="color:gray !important;"';
+                }
+
+                echo '<form method="POST" action="" class="col-md-4 col-4" id="formuser'.$current_user_id.'and'.$badge_id.'">
+            <input type="text" class="visually-hidden" name="iduser" value="'.$current_user_id.'"/>
+            <input type="text" class="visually-hidden" name="idbadget" value="'.$badge_id.'"/>
+            <a href="#" class="text-decoration-none text-center" onclick="document.getElementById(\'formuser'.$current_user_id.'and'.$badge_id.'\').submit(); return false;">
+            <div class="text-center mb-4 text-decoration-none color10 formuser'.$rowgrid['id'].'" Data-bs-toggle="popover" title="' . $rowgrid['name'] . '" data-bs-content="' . $rowgrid['description'] . ' ' . $dateshow . ' "><img src="./assets/images/badgets/' . $rowgrid['url'] . '" class="badgetimg" ' . $colorbadget . '  alt="Insignia ' . $rowgrid['name'] . '"/><div class="text-decoration-none text-center" ' . $fontcolorbadget . '>' . $rowgrid['name'] . '</div></div></a></form>';
+
+              }
+              ?>
         </div>
-      </div>
     </div>
-	  </div>
-
-    <div class="modal fade" id="Modaldelete<? echo $rowmodal['id']; ?>" tabindex="-1" aria-labelledby="Modaldelete<? echo $rowmodal['id']; ?>Label" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content rounded-4 shadow">
-        <div class="modal-header p-5 pb-4 border-bottom-0">
-          <h1 class="fw-bold mb-0 fs-2">Eliminar cuenta</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body p-5 pt-0">
-          <?php if($rowmodal['id']=='1'){
-            echo '<h4>Usuario no se puede eliminar</h4>';
-          }else{?>
-          <form class="" method="post" action="">
-            <input type="text" class="visually-hidden" name="iddelete" value="<? echo $rowmodal['id']; ?>"/>
-            <h4>La cuenta de <a class="text-reset fw-bolder text-danger-emphasis"><? echo $rowmodal['name'].' '.$rowmodal['lastname']; ?></a> será eliminada de forma permanente</h4>
-            <button class="w-100 mb-2 mt-4 btn btn-lg rounded-3 btn-danger fwhite end-0" name="edit" type="submit">Eliminar</button>
-            
-          </form>
-          <?php } ?>
         </div>
       </div>
     </div>

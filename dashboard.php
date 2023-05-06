@@ -1,5 +1,6 @@
 <?php
 session_start();
+ini_set('session.cookie_httponly', true);
 require_once 'config.php';
 
 if (!isset($_COOKIE['session_id'])) {
@@ -41,20 +42,90 @@ $conn->close();
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
   <link href="./assets/css/main.css" rel="stylesheet">
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-messaging.js"></script>
+<script>
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDQ_w7NbO-I9O2-tkGbbja6rkO1IYvBewA",
+  authDomain: "young-dreamers-for-talaigua.firebaseapp.com",
+  projectId: "young-dreamers-for-talaigua",
+  storageBucket: "young-dreamers-for-talaigua.appspot.com",
+  messagingSenderId: "283442209810",
+  appId: "1:283442209810:web:c03492d12872dfe7a324cb",
+  measurementId: "G-C8N5445VR6"
+};
+
+
+  firebase.initializeApp(firebaseConfig);
+  
+  const messaging = firebase.messaging();
+</script>
 </head>
 
 <body class="mb-5">
   <div class="preloader" id="preloader">
     <div class="loader"></div>
   </div>
+  <div class="modal fade" id="welcomemodal" tabindex="-1" aria-labelledby="welcomemodalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-body p-5">
+        <?php if ($_SESSION['pastlogin']==NULL) {
+            $firstmessage = 'Bienvenid@ a';
+          }else{
+            $firstmessage = 'Bienvenid@ nuevamente a';
+          }?>
+        <h2 class="fw-bold mb-0 text-center"><?php echo $firstmessage; ?></h2>
+        <h2 class="fw-bold mb-0 text-center">Jóvenes Soñadores Por Talaigua</h2>
+        <ul class="d-grid gap-4 my-5 list-unstyled small">
+          <?php if ($_SESSION['pastlogin']==NULL){ 
+            $nombreuser = $row['name'];
+            echo '
+          <li class="d-flex gap-4">
+            <img src="./assets/icons/maskable_icon_x512.png" width="50px" height="50px">
+            <div>
+              <h5 class="mb-0">Hola '.$nombreuser.'</h5>
+              Es un placer tenerte en nuestro equipo
+            </div>
+          </li>
+          <li class="d-flex gap-4">
+            <img src="./assets/icons/info.png" width="50px" height="50px">
+            <div>
+              <h5 class="mb-0">Lo hacemos facil</h5>
+              Plataforma intuitiva
+            </div>
+          </li>
+          <li class="d-flex gap-4">
+            <img src="./assets/icons/trust.png" width="50px" height="50px">
+            <div>
+              <h5 class="mb-0">Apoyos, voluntariados y amor</h5>
+              Por un mejor mañana
+            </div>
+          </li>'; }else{ echo'<li class="d-flex gap-4">
+            <img src="./assets/icons/maskable_icon_x512.png" width="100%" height="100%">
+          </li>';} ?>
+        </ul>
+        <button type="button" class="btn btn-lg btn-primary mt-5 w-100" data-bs-dismiss="modal"><?php if ($_SESSION['pastlogin']==NULL) {
+            echo 'Vamos!!';
+          }else{
+            echo 'Adelante';
+          }?></button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
   <div class="conatiner-fluid p-4">
     <div class="row">
       <form class="form-group has-search col-10 pe-0" method="post" action="search">
         <input type="text" class="form-control backgroundalt searchhome" name="keyword" placeholder="Buscar eventos o información...">
       </form>
-      <div class="notifications col-2 text-center">
+      <div class="notifications col-2 text-center" id="subscribeButton">
         <div class="icon" data-bs-toggle="offcanvas" data-bs-target="#notificationCanva" aria-controls="notificationCanva">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="auto" fill="currentColor" class="bi bi-bell"
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" fill="currentColor" class="bi bi-bell"
             viewBox="0 0 16 16">
             <path
               d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z" />
@@ -180,20 +251,6 @@ $conn->close();
   </nav>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-<script src="./assets/js/app.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function (registration) {
-          console.log('Service worker registered successfully with scope: ', registration.scope);
-        })
-        .catch(function (error) {
-          console.log('Service worker registration failed with error: ', error);
-        });
-    });
-  }
-</script>
 <script>
   window.addEventListener("load", function () {
     const preloader = document.getElementById("preloader");
@@ -208,5 +265,33 @@ $conn->close();
     touch: true
   })
 </script>
+<?php 
+    $last_login = strtotime($row['last_login']);
+    $now = time();
+    if ($now - $last_login < 100) {
+
+    if ($_SESSION['alert_shown']==true) {
+  echo "
+  <script>
+    $( document ).ready(function() {
+    $('#welcomemodal').modal('toggle')
+});
+
+  </script>";
+   $_SESSION['alert_shown'] = false;
+}
+}elseif($_SESSION['pastlogin']=NULL){
+  if ($_SESSION['alert_shown']==true) {
+  echo "
+  <script>
+    $( document ).ready(function() {
+    $('#welcomemodal').modal('toggle')
+});
+
+  </script>";
+   $_SESSION['alert_shown'] = false;
+}
+} ?>
+ <script src="./assets/js/app.js"></script>
 </body>
 </html>

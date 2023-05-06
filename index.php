@@ -1,11 +1,15 @@
 <?php
 session_start();
+ini_set('session.cookie_httponly', true);
 require_once 'config.php';
+
 
 if (isset($_COOKIE['session_id'])) {
     header('Location: ./dashboard');
     exit;
 }
+
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['emailorusername'])) {
     $emailorusername = mysqli_real_escape_string($conn, $_POST['emailorusername']);
@@ -22,11 +26,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['emailorusername'])) {
             $row = $result->fetch_assoc();
 
             $session_id = uniqid();
+            if($row['last_login'] == NULL){
+    $_SESSION['pastlogin'] = NULL;
+} else {
+    $_SESSION['pastlogin'] = $row['last_login'];
+}
 
             $sql = "UPDATE users SET cookie='$session_id', last_login=NOW() WHERE id=" . $row['id'];
             $conn->query($sql);
 
-            setcookie('session_id', $session_id, time() + (86400 * 30), "/"); 
+            setcookie('session_id', $session_id, time() + (86400 * 30), "/");
+            echo "<script>window.localStorage.setItem('session_id', '$session_id');</script>";
+
+              $_SESSION['alert_shown'] = true;
+
+            $_SESSION['session_id'] = $session_id;
 
             header('Location: ./dashboard');
             exit;
@@ -141,7 +155,7 @@ $conn->close();
   <meta name="language" content="Spanish">
   <meta name="revisit-after" content="30 days">
   <link rel="canonical" href="https://youngdreamersfortalaigua.org/">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <title>Fundación Jóvenes Soñadores Por Talaigua</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
@@ -149,6 +163,28 @@ $conn->close();
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
+    <script src="./assets/js/reg.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-messaging.js"></script>
+<script>
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDQ_w7NbO-I9O2-tkGbbja6rkO1IYvBewA",
+  authDomain: "young-dreamers-for-talaigua.firebaseapp.com",
+  projectId: "young-dreamers-for-talaigua",
+  storageBucket: "young-dreamers-for-talaigua.appspot.com",
+  messagingSenderId: "283442209810",
+  appId: "1:283442209810:web:c03492d12872dfe7a324cb",
+  measurementId: "G-C8N5445VR6"
+};
+
+
+  firebase.initializeApp(firebaseConfig);
+  
+  const messaging = firebase.messaging();
+</script>
+
 </head>
 
 <body>
@@ -231,7 +267,7 @@ $conn->close();
                 <label for="floatingdate">Fecha de nacimiento</label>
             </div>
             <div class="form-floating mb-3">
-            <select class="form-select " name="gender" id="inlineFormSelectPref" required>
+            <select class="form-select " name="gender" id="inlineFormSelectPrefGen" required>
               <option selected>Seleccione...</option>
               <option value="male" <?php if(isset($_GET['gender'])) { if($_GET['gender']=='male'){echo 'selected';} } ?>>Hombre</option>
               <option value="female" <?php if(isset($_GET['gender'])) { if($_GET['gender']=='female'){echo 'selected';} } ?>>Mujer</option>
@@ -301,6 +337,8 @@ $conn->close();
               type="submit">Entrar</button>
             <small class="text-body-secondary">Al entrar aceptas nuestros <a href="./index.html" class=""></a>
               terminos.</small>
+              <br/>
+            <small class="text-body-secondary"><a href="./forgot" class="text-decoration-none" style="color: #1F2D36 !important;">¿Olvidaste tu contraseña?</a></small>
           </form>
         </div>
       </div>
@@ -311,7 +349,6 @@ $conn->close();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
-  <script src="./assets/js/app.js"></script>
 
   <!-- Service worker registration -->
  
@@ -338,20 +375,16 @@ $conn->close();
 
 </script>";
 } ?>
- <script>
-    if ('serviceWorker' in navigator) {
+<script>if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-      // Registration was successful
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function(err) {
-      // registration failed :(
-      console.log('ServiceWorker registration failed: ', err);
-    });
+    navigator.serviceWorker.register('/swreg.js');
   });
-}
+}</script>
+<script defer src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.21.0/firebase-messaging.js"></script>
+ <script src="./assets/js/app.js"></script>
+ <script type="module" src="./assets/js/app.js"></script>
 
-  </script>
 </body>
 
 </html>

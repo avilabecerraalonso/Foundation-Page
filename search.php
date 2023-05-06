@@ -146,7 +146,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     </div>
 
 
-    <nav class="nav nav-fill fixed-bottom backgroundalt">
+    <nav class="nav nav-fill fixed-bottom backgroundalt pb-3">
         <a class="nav-link active" aria-current="page" href="./dashboard"><svg xmlns="http://www.w3.org/2000/svg"
                 width="100%" height="100%" fill="currentColor" class="bi bi-house-heart" viewBox="0 0 16 16">
                 <path d="M8 6.982C9.664 5.309 13.825 8.236 8 12 2.175 8.236 6.336 5.309 8 6.982Z" />
@@ -179,30 +179,15 @@ while ($row = mysqli_fetch_assoc($result)) {
             <div class="text-decoration-none text-center">Cuenta</div>
         </a>
     </nav>
-</body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
-<script src="./assets/js/app.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/sw.js')
-                .then(function (registration) {
-                    console.log('Service worker registered successfully with scope: ', registration.scope);
-                })
-                .catch(function (error) {
-                    console.log('Service worker registration failed with error: ', error);
-                });
-        });
-    }
-</script>
 <script>
     window.addEventListener("load", function () {
         const preloader = document.getElementById("preloader");
         preloader.classList.add("hide-preloader");
     });
 </script>
+<script src="./assets/js/app.js"></script>
 </body>
-
 </html>

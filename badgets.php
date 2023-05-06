@@ -204,7 +204,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idbadgetedit'])) {
     <title>Insignias | Fundación Jóvenes Soñadores Por Talaigua</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link href="./assets/css/main.css" rel="stylesheet">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            function loadData(page){
+                var keyword = $('#keyword').val();
+                $.ajax({
+                    url: 'fetchbadget.php',
+                    type: 'POST',
+                    data: {page: page, keyword: keyword},
+                    success: function(response){
+                        $('#result').html(response);
+                    }
+                });
+            }
+            loadData(1);
+
+            $(document).on('click', '.pagination li a', function(e){
+                e.preventDefault();
+                var page = $(this).data('page');
+                loadData(page);
+            });
+
+            // Function to handle search input change event
+            $('#keyword').on('input', function(){
+                loadData(1);
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="preloader" id="preloader">
@@ -214,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idbadgetedit'])) {
         <h2>Insignias</h2>
         <div class="row">
             <form class="form-group has-search col-10 pe-0">
-                <input type="text" class="form-control backgroundalt searchhome" name="keyword"
+                <input type="text" class="form-control backgroundalt searchhome" id="keyword" name="keyword"
                     placeholder="Buscar insignia...">
             </form>
             <div class="notifications col-2 text-center">
@@ -257,46 +285,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idbadgetedit'])) {
         header('Content-Type: text/html; charset=utf-8');
         $sqlgrid = "SELECT * FROM badget";
         $resultgrid = mysqli_query($conn, $sqlgrid); ?>
-        <div class="row mt-4">
-            <?php
-            while ($rowgrid = mysqli_fetch_assoc($resultgrid)) {
-                echo '<a href="#"  data-bs-toggle="modal" data-bs-target="#ModalEditBadget' . $rowgrid['id'] . '" class="col-md-4 col-4 text-center mb-4 text-decoration-none color10" title="' . $rowgrid['name'] . '" "><img src="./assets/images/badgets/' . $rowgrid['url'] . '" class="badgetimg" alt="Insignia ' . $rowgrid['name'] . '"/><div class="text-decoration-none text-center">' . $rowgrid['name'] . '</div></a>';
-                echo '<div class="modal fade" id="ModalEditBadget' . $rowgrid['id'] . '" tabindex="-1" aria-labelledby="ModalEditBadget' . $rowgrid['id'] . 'Label" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content rounded-4 shadow">
-                      <div class="modal-header p-5 pb-4 border-bottom-0">
-                        <h1 class="fw-bold mb-0 fs-2">Editar Evento</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body p-5 pt-0">
-                        <form class="" method="post" action="" enctype="multipart/form-data">
-                        <input type="text" name="idbadgetedit" class="visually-hidden" value="' . $rowgrid['id'] . '">
-                        <input type="text" name="urlbadgetedit" class="visually-hidden" value="' . $rowgrid['url'] . '">
-                          <div class="form mb-3">
-                            <label class="form-label">Titulo</label>
-                            <textarea name="titlebadgetedit" class="form-control rounded-3" id="floatingtitle" rows="1" required>' . $rowgrid['name'] . '</textarea>
-                          </div>
-                        <div class="form mb-3">
-                            <label class="form-label">Icono</label>
-                                <input type="file" class="form-control" name="icobadget" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload">
-                        </div>
-                          <div class="form mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea name="content" class="form-control rounded-3" id="floatingcontent" rows="8" required>' . $rowgrid['description'] . '</textarea>
-                          </div>
-                          <button class="w-100 mb-2 btn btn-lg rounded-3 background30 fwhite end-0" name="edit" type="submit">Editar</button>
-                        </form>
-                        <form class="" method="post" action="">
-                        <input type="text" name="idbadgetdelete" class="visually-hidden" value="' . $rowgrid['id'] . '">
-                        <input type="text" name="urlbadgetdelete" class="visually-hidden" value="' . $rowgrid['url'] . '">
-                        <button class="w-100 mb-2 btn btn-lg rounded-3 btn-danger fwhite end-0" name="edit" type="submit">Eliminar</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>';
-            }
-            ?>
+        <div class="row mt-4" id="result">
+            
         </div>
     </div>
     <nav class="nav nav-fill fixed-bottom backgroundalt pb-3">
@@ -324,27 +314,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idbadgetedit'])) {
             <div class="text-decoration-none text-center">Cuenta</div>
         </a>
     </nav>
-</body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-<script src="./assets/js/app.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/sw.js')
-                .then(function (registration) {
-                    console.log('Service worker registered successfully with scope: ', registration.scope);
-                })
-                .catch(function (error) {
-                    console.log('Service worker registration failed with error: ', error);
-                });
-        });
-    }
-</script>
 <script>
     window.addEventListener("load", function () {
         const preloader = document.getElementById("preloader");
         preloader.classList.add("hide-preloader");
     });
 </script>
+<script src="./assets/js/app.js"></script>
 </body>
 </html>

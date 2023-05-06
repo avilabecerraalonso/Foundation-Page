@@ -115,30 +115,15 @@ echo '
 </nav>';
 }
 ?>
-</body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
-<script src="./assets/js/app.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/sw.js')
-                .then(function (registration) {
-                    console.log('Service worker registered successfully with scope: ', registration.scope);
-                })
-                .catch(function (error) {
-                    console.log('Service worker registration failed with error: ', error);
-                });
-        });
-    }
-</script>
 <script>
     window.addEventListener("load", function () {
         const preloader = document.getElementById("preloader");
         preloader.classList.add("hide-preloader");
     });
 </script>
+<script src="./assets/js/app.js"></script>
 </body>
-
 </html>
